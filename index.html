@@ -15,15 +15,15 @@
       const html = `
       <div style="display: flex;">
         <div style="position: relative; width: 50%; ">
-          <textarea id="word${i}" style="width: 100%; height: 480px; font-size: 16px; padding: 8px;"></textarea>
+          <textarea id="word${i}" style="width: 100%; height: 480px; font-size: 16px; padding: 8px; box-sizing: border-box;"></textarea>
           <div style="position: absolute; bottom: 0; right: 0; display: flex; align-items: center;">
             <select name="sex" style="width: 200px; height: 40px; font-size: 32px; line-height: 32px">
-              <option value="delete">改行削除</option>
+              <option value="delete">del new line</option>
             </select>
-            <button id="button${i}" style="width: 160px; height: 42px; line-height: 16px;">決定</button>
+            <button id="button${i}" style="width: 60px; height: 42px; line-height: 16px;">submit</button>
           </div>
         </div>
-        <div id="japanese${i}" style="width: 50%"></div>
+        <div id="japanese${i}" style="width: 50%; padding: 8px; box-sizing: border-box;"></div>
       </div>`
 
       document.getElementById("main").innerHTML += html
