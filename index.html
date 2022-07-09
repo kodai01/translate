@@ -12,15 +12,19 @@
 </head>
 <body>
   <div id="main" style="margin-bottom: 60px;"></div>
-  <div style="position: fixed; bottom: 0px; width: 100%; height: 60px; background-color: antiquewhite;">
-    <select name="selct" id="textOrRe">
-      <option value="text">テキスト</option>
-      <option value="re">正規表現</option>
-    </select>
-    <form name="checkbox" style="display: flex; align-items: center;">
-      <input type="checkbox" id="g" name="g">
-      <label for="g">g</label>
-  </form>
+  <div style="position: fixed; bottom: 0px; width: 100%; height: 60px; background-color: antiquewhite; display: flex;">
+    <div>
+      <select name="selct" id="textOrRe">
+        <option value="text">文字列</option>
+        <option value="re">正規表現</option>
+      </select>
+      <form name="checkbox" style="display: flex; align-items: center;">
+        <input type="checkbox" id="g" name="g">
+        <label for="g">全変更</label>
+      </form>
+    </div>
+    <div id="input" style="display: flex;">
+    </div>
   </div>
 
   <script type="text/javascript">
@@ -31,10 +35,6 @@
         <div style="position: relative; width: 50%; ">
           <textarea id="word${i}" style="width: 100%; height: 480px; font-size: 16px; padding: 8px;"></textarea>
           <div style="position: absolute; bottom: 0; right: 0; display: flex; align-items: center;">
-            <div style="display: flex; width: calc(100% - 160px);">
-              <input id="inputi${i}"  style="width: 50%;" placeholder="置換前" />
-              <input id="inputo${i}"  style="width: 50%;" placeholder="置換後" />
-            </div>
             <button id="button${i}" style="width: 160px; height: 42px; line-height: 16px;">決定</button>
           </div>
         </div>
@@ -44,17 +44,38 @@
       document.getElementById("main").innerHTML += html
     }
 
+    for (let i = 1; i <= 6; i++) {
+      const html = `
+      <div style="display: flex; flex-direction: column; width: 100px;">
+        <input id="inputi${i}" placeholder="変更前${i}" />
+        <input id="inputo${i}" placeholder="変更後${i}" />
+      </div>
+      `
+      document.getElementById("input").innerHTML += html
+    }
+
+    const func = (i, isRe, isG, removeNewLine) => {
+      let text = removeNewLine
+      for (let j = 1; j <= 6; j++) {
+        const g = isG ? "g" : undefined
+        eval(`
+        const before = ${isRe} ? new RegExp(document.getElementById("inputi${j}").value, ${g}) : document.getElementById("inputi${j}").value;
+        const after = document.getElementById("inputo${j}").value;
+        text = ${isG} ? text.replaceAll(before, after) : text.replace(before, after);
+        `)
+      }
+      return text;
+    }
+
     for (let i = 1; i <= 10; i++) {
       eval(`
       document.getElementById("button${i}").onclick = function () {
         const isRe = document.getElementById("textOrRe").value === "re";
         const isG = document.checkbox.g.checked;
-        const before = isRe ? new RegExp(document.getElementById("inputi${i}").value) : document.getElementById("inputi${i}").value;
-        const after = document.getElementById("inputo${i}").value;
 
         const removeNewLine = document.getElementById("word${i}").value.replace(re, "");
 
-        const ja${i} = isG ? removeNewLine.replaceAll(before, after) : removeNewLine.replace(before, after);
+        const ja${i} = func(${i}, isRe, isG, removeNewLine);
         
         document.getElementById("japanese${i}").innerText = ja${i};
       }
