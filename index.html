@@ -18,6 +18,11 @@
         <option value="text">文字列</option>
         <option value="re">正規表現</option>
       </select>
+      <select name="pattern" id="pattern">
+        <option value="no">指定なし</option>
+        <option value="delnewline">改行を削除</option>
+        <option value="delnewlineandaddspace">改行->空白</option>
+      </select>
       <form name="checkbox" style="display: flex; align-items: center;">
         <input type="checkbox" id="g" name="g">
         <label for="g">全変更</label>
@@ -81,8 +86,21 @@
       document.getElementById("button${i}").onclick = function () {
         const isRe = document.getElementById("textOrRe").value === "re";
         const isG = document.checkbox.g.checked;
+        const pattern = document.getElementById("pattern").value
 
-        const removeNewLine = document.getElementById("word${i}").value.replace(re, "");
+        let removeNewLine = null
+
+        switch (pattern) {
+          case "delnewline":
+            removeNewLine = document.getElementById("word${i}").value.replace(re, "");
+          break;
+          case "delnewlineandaddspace":
+            removeNewLine = document.getElementById("word${i}").value.replace(re, " ");
+          break;
+          default:
+            removeNewLine = document.getElementById("word${i}").value;
+          break;
+        }
 
         const ja${i} = func(${i}, isRe, isG, removeNewLine);
         
