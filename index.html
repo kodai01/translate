@@ -22,6 +22,7 @@
         <option value="no">指定なし</option>
         <option value="delnewline">改行を削除</option>
         <option value="delnewlineandaddspace">改行->空白</option>
+        <option value="delspace">空白を削除</option>
       </select>
       <form name="checkbox" style="display: flex; align-items: center;">
         <input type="checkbox" id="g" name="g">
@@ -97,6 +98,8 @@
           case "delnewlineandaddspace":
             removeNewLine = document.getElementById("word${i}").value.replace(re, " ");
           break;
+          case "delspace":
+            removeNewLine = document.getElementById("word${i}").value.replace(" ", "");
           default:
             removeNewLine = document.getElementById("word${i}").value;
           break;
