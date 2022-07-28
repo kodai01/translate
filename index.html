@@ -14,15 +14,15 @@
   <div id="main" style="margin-bottom: 72px;"></div>
   <div style="position: fixed; bottom: 0px; width: 100%; height: 72px; background-color: antiquewhite; display: flex;">
     <div>
-      <select name="selct" id="textOrRe">
-        <option value="text">文字列</option>
-        <option value="re">正規表現</option>
+      <select name="selct" id="textOrRe" style="width: 60px;">
+        <option value="text">text</option>
+        <option value="re">regular expression</option>
       </select>
-      <select name="pattern" id="pattern">
-        <option value="no">指定なし</option>
-        <option value="delnewline">改行を削除</option>
-        <option value="delnewlineandaddspace">改行->空白</option>
-        <option value="delspace">空白を削除</option>
+      <select name="pattern" id="pattern" style="width: 100px;">
+        <option value="no">-</option>
+        <option value="delnewline">delete new line</option>
+        <option value="delnewlineandaddspace">translate new line -> whitespace</option>
+        <option value="delspace">delete whitespace</option>
       </select>
       <form name="checkbox" style="display: flex; align-items: center;">
         <input type="checkbox" id="g" name="g">
