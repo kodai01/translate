@@ -1,0 +1,46 @@
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  試行回数<input type="number" id="n"/> 回
+  成功確率<input type="number" id="p" /> %
+  <button id="button">計算</button>
+
+  <div id="list">
+  </div>
+
+  <script type="text/javascript">
+
+  const list = document.getElementById("list")
+
+  document.getElementById("button").onclick = function () {
+    const n = document.getElementById("n").value
+    const p = document.getElementById("p").value / 100
+    
+    const kaijo = (n) => {
+      let answer = 1
+      for (let i = 1; i <= n; i++) {
+        answer = answer * i
+      }
+      return answer
+    }
+    
+    const nCr = (n, r) => {
+      return kaijo(n) / ( kaijo(r) * kaijo( n - r))
+    }
+    list.innerHTML = ""
+    for (let i = 0; i <= n; i++) {
+      const html = `
+      <div>${i}回: ${nCr(n ,i) * p ** i * (1 - p) ** (n - i)}</div>
+      `
+      list.innerHTML += html
+    }
+  }
+  </script>
+</body>
+</html>
