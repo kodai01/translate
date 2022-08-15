@@ -36,9 +36,9 @@
     list.innerHTML = ""
     for (let i = 0; i <= n; i++) {
       const percent = nCr(n ,i) * p ** i * (1 - p) ** (n - i) * 100
-      if (percent >= 1) {
+      if (percent >= 0.1) {
        const html = `
-        <div>${i}回: ${Math.round(percent * 10) / 10}</div>
+        <div>${i}回: ${Math.round(percent * 10) / 10}%</div>
       `
       list.innerHTML += html
       }
