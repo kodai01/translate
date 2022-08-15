@@ -34,6 +34,10 @@
       return kaijo(n) / ( kaijo(r) * kaijo( n - r))
     }
     list.innerHTML = ""
+   
+   if (n > 1000) {
+    list.innerHTML = "1000を超える回数は計算できません"
+   } else {
     for (let i = 0; i <= n; i++) {
       const percent = nCr(n ,i) * p ** i * (1 - p) ** (n - i) * 100
       if (percent >= 0.1) {
@@ -43,6 +47,7 @@
       list.innerHTML += html
       }
     }
+   }
   }
   </script>
 </body>
