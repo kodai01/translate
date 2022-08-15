@@ -38,7 +38,7 @@
       const percent = nCr(n ,i) * p ** i * (1 - p) ** (n - i) * 100
       if (percent >= 1) {
        const html = `
-        <div>${i}回: ${percent}</div>
+        <div>${i}回: ${Math.round(percent * 10) / 10}</div>
       `
       list.innerHTML += html
       }
