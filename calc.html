@@ -35,10 +35,13 @@
     }
     list.innerHTML = ""
     for (let i = 0; i <= n; i++) {
-      const html = `
-      <div>${i}回: ${nCr(n ,i) * p ** i * (1 - p) ** (n - i)}</div>
+      const percent = nCr(n ,i) * p ** i * (1 - p) ** (n - i) * 100
+      if (percent >= 1) {
+       const html = `
+        <div>${i}回: ${percent}</div>
       `
       list.innerHTML += html
+      }
     }
   }
   </script>
