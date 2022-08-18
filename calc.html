@@ -37,26 +37,25 @@
       }
     }
     list.innerHTML = ""
-   
-   if (n > 340) {
-    list.innerHTML = "340を超える回数は計算できません"
-   } else {
    let expectedValue = 0;
    let accumulationProbability = 0;
     for (let i = 0; i <= n; i++) {
-      const percent = nCr(n ,i) * p ** i * (1 - p) ** (n - i) * 100
+      let percent = nCr(n ,i) * p ** i * (1 - p) ** (n - i) * 100
+      if (percent < 0.1) percent = 0;
       expectedValue += percent / 100 * i
       accumulationProbability += percent
-      
-      if (percent >= 0.1) {
+      if (accumulationProbability > 99.8) {
+      list.innerHTML += ”これ以上は計算できません"
+        break;
+      }
+      //if (percent >= 0.1) {
        const html = `
-        <div>${i}回: ${Math.round(percent * 10) / 10}%, 累積${Math.round(accumulationProbability * 10) / 10} %</div>
+        <div>${i}回: ${percent}%, 累積${accumulationProbability} %</div>
       `
       list.innerHTML += html
-      }
+      //}
       document.getElementById("expectedValue").innerText = Math.round(expectedValue * 10) / 10
     }
-   }
   }
   </script>
 </body>
