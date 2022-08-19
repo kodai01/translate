@@ -44,7 +44,7 @@
       if (percent < 0.1) percent = 0;
       expectedValue += percent / 100 * i
       accumulationProbability += percent
-      if (isFinite(accumulationProbability)) {
+      if (!isFinite(accumulationProbability)) {
       list.innerHTML += "これ以上は計算できません"
         break;
       }
