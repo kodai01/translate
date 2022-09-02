@@ -31,6 +31,7 @@
     </div>
     <div id="input" style="display: flex; align-items: center;">
     </div>
+    <div><input type="range" id="range" min="1" max="30" value="16" /></div>
   </div>
 
   <script type="text/javascript">
@@ -44,7 +45,7 @@
         </div>
         <div style="display: flex;">
           <div style="position: relative; width: 50%;" class="left">
-            <textarea id="word${i}" style="width: 100%; height: 480px; font-size: 16px; padding: 8px;"></textarea>
+            <textarea class="textarea" id="word${i}" style="width: 100%; height: 480px; font-size: 16px; padding: 8px;"></textarea>
             <div style="position: absolute; bottom: 8px; right: 0; display: flex; align-items: center;">
               <button id="button${i}" style="width: 160px; height: 42px; line-height: 16px;">決定</button>
             </div>
@@ -88,9 +89,7 @@
         const isRe = document.getElementById("textOrRe").value === "re";
         const isG = document.checkbox.g.checked;
         const pattern = document.getElementById("pattern").value
-
         let removeNewLine = null
-
         switch (pattern) {
           case "delnewline":
             removeNewLine = document.getElementById("word${i}").value.replace(re, "");
@@ -104,7 +103,6 @@
             removeNewLine = document.getElementById("word${i}").value;
           break;
         }
-
         const ja${i} = func(${i}, isRe, isG, removeNewLine);
         
         document.getElementById("japanese${i}").innerText = ja${i};
@@ -119,6 +117,10 @@
     function copy(i) {
       navigator.clipboard.writeText(document.getElementById(`japanese${i}`).innerText)
     }
+    
+    document.getElementById("range").addEventListener("change", (e) => {
+      document.querySelectorAll(".textarea").style.color = "red"
+});
 
   </script>
 </body>
