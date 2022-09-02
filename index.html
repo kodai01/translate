@@ -119,7 +119,9 @@
     }
     
     document.getElementById("range").addEventListener("change", (e) => {
-      document.querySelectorAll(".textarea").style.color = "red"
+      document.querySelectorAll(".textarea").forEach(element => {
+        element.style.fontSize = e.target.value + "px"
+      })
 });
 
   </script>
