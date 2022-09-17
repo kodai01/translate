@@ -20,23 +20,38 @@
       </select>
       <select name="pattern" id="pattern" style="width: 100px;">
         <option value="no">-</option>
-        <option value="delnewline">delete new line</option>
-        <option value="delnewlineandaddspace">translate new line -> whitespace</option>
-        <option value="delspace">delete whitespace</option>
+        <option value="delnewline">改行削除</option>
+        <option value="delnewlineandaddspace">改行 -> 空白</option>
+        <option value="delspace">空白削除</option>
       </select>
-      <form name="checkbox" style="display: flex; align-items: center;">
-        <input type="checkbox" id="g" name="g">
-        <label for="g">全変更</label>
+      <form name="checkbox" style="display: flex; flex-direction: column;">
+        <div>
+          <input type="checkbox" id="g" name="g">
+          <label for="g">全変更</label>
+        </div>
+        <div>
+          <input type="checkbox" id="seqCopyMode" name="seqCopyMode">
+          <label for="seqCopyMode">連続コピー時改行付与</label>
+        </div>
       </form>
     </div>
     <div id="input" style="display: flex; align-items: center;">
     </div>
-    <div><input type="range" id="range" min="1" max="30" value="16" /></div>
+    <div style="display: flex; align-items: center; flex-direction: column;">
+      <input type="range" id="range" min="1" max="30" value="16" />
+      <div style="display: flex; padding: 0 8px;">
+        <button style="width: 88px; height: 48px;" onclick="seqReset()">連続コピーリセット</button>
+        <button style="width: 88px; height: 48px;" onclick="reset()">全リセット</button>
+      </div>
+    </div>
+    <div style="font-size: 12px;">コピー文字<span id="copylength">0</span>文字</div>
   </div>
 
   <script type="text/javascript">
     const re = new RegExp(/\r?\n/g);
-    for (let i = 1; i <= 30; i++) {
+    let viewTextarea = 30;
+    let tmpCopy = ""
+    for (let i = 1; i <= viewTextarea; i++) {
       const html = `
       <div style="display: flex; flex-direction: column; margin-bottom: 16px;">
         <div style="display: flex;">
@@ -52,7 +67,10 @@
           </div>
           <div style="width: 50%; position: relative;" class="right">
             <div id="japanese${i}"></div>
-            <button style="position: absolute; bottom: 0; right: 0; width: 160px; height: 42px; line-height: 16px;" onclick="copy(${i});">コピー</button>  
+            <div style="display: flex; align-items: flex-end">
+              <button style="position: absolute; bottom: 0; right: 160px; width: 160px; height: 42px; line-height: 16px;" onclick="seqCopy(${i});">連続コピー</button>  
+              <button style="position: absolute; bottom: 0; right: 0; width: 160px; height: 42px; line-height: 16px;" onclick="copy(${i});">コピー</button>  
+            </div>
           </div>
         </div>
       </div>`
@@ -83,7 +101,7 @@
       return text;
     }
 
-    for (let i = 1; i <= 30; i++) {
+    for (let i = 1; i <= viewTextarea; i++) {
       eval(`
       document.getElementById("button${i}").onclick = function () {
         const isRe = document.getElementById("textOrRe").value === "re";
@@ -114,8 +132,37 @@
       document.getElementById(`title${i}`).innerText = document.getElementById(`input${i}`).value
     }
 
+    function seqCopy(i) {
+      if (document.checkbox.seqCopyMode.checked && tmpCopy.length != 0) {
+        tmpCopy += "\n"
+      }
+      tmpCopy += document.getElementById(`japanese${i}`).innerText
+      if (tmpCopy.length > 5000) {
+        alert("5000文字を超えています")
+      } else {
+        navigator.clipboard.writeText(tmpCopy)
+        document.getElementById("copylength").innerText = tmpCopy.length
+      }
+    }
+
     function copy(i) {
       navigator.clipboard.writeText(document.getElementById(`japanese${i}`).innerText)
+      seqReset()
+    }
+
+    function seqReset() {
+      tmpCopy = ""
+      document.getElementById("copylength").innerText = 0
+    }
+
+    function reset() {
+      seqReset()
+      for (let i = 1; i <= viewTextarea; i++) {
+        document.getElementById(`input${i}`).value = ""
+        document.getElementById(`word${i}`).value = ""
+        document.getElementById(`title${i}`).value = ""
+        document.getElementById(`japanese${i}`).innerText = ""        
+      }
     }
     
     document.getElementById("range").addEventListener("change", (e) => {
