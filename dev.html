@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+  </style>
+  <title>α版</title>
+</head>
+<body>
+  <div id="mode" style="position: fixed; top: 0; left: 0; background-color: rgba(239, 133, 129, 0.5); padding: 16px; z-index: 1;">通常コピー中</div>
+  <div id="main" style="margin-bottom: 72px;"></div>
+  <div style="position: fixed; bottom: 0px; width: 100%; height: 72px; background-color: antiquewhite; display: flex;">
+    <div>
+      <select name="selct" id="textOrRe" style="width: 60px;">
+        <option value="text">文字</option>
+        <option value="re">正規表現</option>
+      </select>
+      <select name="pattern" id="pattern" style="width: 100px;">
+        <option value="no">-</option>
+        <option value="delnewline">改行削除</option>
+        <option value="delnewlineandaddspace">改行 -> 空白</option>
+        <option value="delspace">空白削除</option>
+      </select>
+      <form name="checkbox" style="display: flex; flex-direction: column;">
+        <div>
+          <input type="checkbox" id="g" name="g">
+          <label for="g">全変更</label>
+        </div>
+        <div>
+          <input type="checkbox" id="seqCopyMode" name="seqCopyMode">
+          <label for="seqCopyMode">連続コピー時改行付与</label>
+        </div>
+      </form>
+    </div>
+    <div id="input" style="display: flex; align-items: center;">
+    </div>
+    <div style="display: flex; align-items: center; flex-direction: column;">
+      <input type="range" id="range" min="1" max="30" value="16" />
+      <div style="display: flex; padding: 0 8px;">
+        <button id="modeChange" style="width: 88px; height: 48px;" onclick="changeMode()">連続コピー</button>
+        <button style="width: 88px; height: 48px;" onclick="reset()">全リセット</button>
+      </div>
+    </div>
+    <div style="font-size: 12px;">コピー文字<span id="copylength">0</span>文字</div>
+  </div>
+
+  <script type="text/javascript">
+    const re = new RegExp(/\r?\n/g);
+    let viewTextarea = 30;
+    let tmpCopy = ""
+    let isModeSeqCopy = false
+    for (let i = 1; i <= viewTextarea; i++) {
+      const html = `
+      <div style="display: flex; flex-direction: column; margin-bottom: 16px;">
+        <div style="display: flex;">
+          <input id="input${i}" class="left" style="width: 50%; height: 32px; font-size: 24px;" onchange="changed(${i});"/>
+          <div id="title${i}" class="right" style="width: 50%; font-size: 24px; line-height: 32px;"></div>
+        </div>
+        <div style="display: flex;">
+          <div style="position: relative; width: 50%;" class="left">
+            <textarea class="textarea" id="word${i}" style="width: 100%; height: 480px; font-size: 16px; padding: 8px;"></textarea>
+            <div style="position: absolute; bottom: 8px; right: 0; display: flex; align-items: center;">
+              <button id="button${i}" style="width: 160px; height: 42px; line-height: 16px;">決定</button>
+            </div>
+          </div>
+          <div style="width: 50%; position: relative;" class="right">
+            <div id="japanese${i}"></div>
+            <div style="display: flex; align-items: flex-end">
+              <button style="position: absolute; bottom: 0; right: 0; width: 160px; height: 42px; line-height: 16px;" onclick="newCopy(${i});">コピー</button>  
+            </div>
+          </div>
+        </div>
+      </div>`
+
+      document.getElementById("main").innerHTML += html
+    }
+
+    for (let i = 1; i <= 6; i++) {
+      const html = `
+      <div style="display: flex; flex-direction: column; width: 100px;">
+        <input id="inputi${i}" placeholder="変更前${i}" />
+        <input id="inputo${i}" placeholder="変更後${i}" />
+      </div>
+      `
+      document.getElementById("input").innerHTML += html
+    }
+
+    const func = (i, isRe, isG, removeNewLine) => {
+      let text = removeNewLine
+      for (let j = 1; j <= 6; j++) {
+        const g = isG ? "g" : undefined
+        eval(`
+        const before = ${isRe} ? new RegExp(document.getElementById("inputi${j}").value, ${g}) : document.getElementById("inputi${j}").value;
+        const after = document.getElementById("inputo${j}").value;
+        text = ${isG} ? text.replaceAll(before, after) : text.replace(before, after);
+        `)
+      }
+      return text;
+    }
+
+    for (let i = 1; i <= viewTextarea; i++) {
+      eval(`
+      document.getElementById("button${i}").onclick = function () {
+        const isRe = document.getElementById("textOrRe").value === "re";
+        const isG = document.checkbox.g.checked;
+        const pattern = document.getElementById("pattern").value
+        let removeNewLine = null
+        switch (pattern) {
+          case "delnewline":
+            removeNewLine = document.getElementById("word${i}").value.replace(re, "");
+          break;
+          case "delnewlineandaddspace":
+            removeNewLine = document.getElementById("word${i}").value.replace(re, " ");
+          break;
+          case "delspace":
+            removeNewLine = document.getElementById("word${i}").value.replace(" ", "");
+          default:
+            removeNewLine = document.getElementById("word${i}").value;
+          break;
+        }
+        const ja${i} = func(${i}, isRe, isG, removeNewLine);
+        
+        document.getElementById("japanese${i}").innerText = ja${i};
+      }
+      `)
+    }
+
+    function changed(i) {
+      document.getElementById(`title${i}`).innerText = document.getElementById(`input${i}`).value
+    }
+
+    function seqCopy(i) {
+      if (document.checkbox.seqCopyMode.checked && tmpCopy.length != 0) {
+        tmpCopy += "\n"
+      }
+      tmpCopy += document.getElementById(`japanese${i}`).innerText
+      if (tmpCopy.length > 5000) {
+        alert("5000文字を超えています")
+      } else {
+        navigator.clipboard.writeText(tmpCopy)
+        document.getElementById("copylength").innerText = tmpCopy.length
+      }
+    }
+
+    function copy(i) {
+      navigator.clipboard.writeText(document.getElementById(`japanese${i}`).innerText)
+    }
+
+    function newCopy(i) {
+      if (isModeSeqCopy) {
+        seqCopy(i)
+      } else {
+        copy(i)
+      }
+    }
+
+    function changeMode() {
+      tmpCopy = ""
+      document.getElementById("copylength").innerText = 0
+      if (isModeSeqCopy) {
+        isModeSeqCopy = false
+        document.getElementById("modeChange").innerText = "連続コピー"
+        document.getElementById("mode").innerText = "通常コピー中"
+      } else {
+        isModeSeqCopy = true
+        document.getElementById("modeChange").innerText = "通常コピー"
+        document.getElementById("mode").innerText = "連続コピー中"
+      }
+    }
+
+    function reset() {
+      const confirm = window.confirm("連続コピー中だが削除して問題ないか？")
+      if (confirm) {
+        tmpCopy = ""
+        document.getElementById("copylength").innerText = 0
+        for (let i = 1; i <= viewTextarea; i++) {
+          document.getElementById(`input${i}`).value = ""
+          document.getElementById(`word${i}`).value = ""
+          document.getElementById(`title${i}`).innerText = ""
+          document.getElementById(`japanese${i}`).innerText = ""        
+        }
+      }
+    }
+    
+    document.getElementById("range").addEventListener("change", (e) => {
+      document.querySelectorAll(".textarea").forEach(element => {
+        element.style.fontSize = e.target.value + "px"
+      })
+});
+
+  </script>
+</body>
+</html>
