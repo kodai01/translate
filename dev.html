@@ -64,7 +64,7 @@
           <div style="position: relative; width: 50%;" class="left">
             <textarea class="textarea" id="word${i}" style="width: 100%; height: 480px; font-size: 16px; padding: 8px;"></textarea>
             <div style="position: absolute; bottom: 8px; right: 0; display: flex; align-items: center;">
-              <button id="button${i}" style="width: 160px; height: 42px; line-height: 16px;">決定</button>
+              <button class="button" id="button${i}" style="width: 160px; height: 42px; line-height: 16px;">決定</button>
             </div>
           </div>
           <div style="width: 50%; position: relative;" class="right">
@@ -133,21 +133,46 @@
       document.getElementById(`title${i}`).innerText = document.getElementById(`input${i}`).value
     }
 
+    function unexpectedError(text) {
+      if (text.length == 0) {
+        alert("0文字です")
+        return false
+      }
+      if (/\.\S/.test(text)) {
+        const confirm = window.confirm(`.の直後が空白ではありませんがこのままコピーしますか。${text.match(/\.\S+/)}`)
+        return confirm
+      }
+      return true
+    }
+
     function seqCopy(i) {
       if (document.checkbox.seqCopyMode.checked && tmpCopy.length != 0) {
         tmpCopy += "\n"
       }
-      tmpCopy += document.getElementById(`japanese${i}`).innerText
-      if (tmpCopy.length > 5000) {
-        alert("5000文字を超えています")
-      } else {
-        navigator.clipboard.writeText(tmpCopy)
-        document.getElementById("copylength").innerText = tmpCopy.length
+      const text = document.getElementById(`japanese${i}`).innerText
+      const notUnexpectedError = unexpectedError(text)
+
+      if (notUnexpectedError) {
+        tmpCopy += text
+        if (tmpCopy.length > 5000) {
+          alert("5000文字を超えています")
+        } else {
+          setTimeout(async() => await navigator.clipboard.writeText(tmpCopy), 1000)
+          document.getElementById("copylength").innerText = tmpCopy.length
+        }
       }
     }
 
     function copy(i) {
-      navigator.clipboard.writeText(document.getElementById(`japanese${i}`).innerText)
+      const text = document.getElementById(`japanese${i}`).innerText
+      if (/\.\S/.test(text)) {
+        const confirm = window.confirm(`.の直後が空白ではありませんがこのままコピーしますか。${text.match(/\.\S+/)}`)
+        if (confirm) {
+          setTimeout(async() => await navigator.clipboard.writeText(text), 1000)
+        }
+      } else {
+          navigator.clipboard.writeText(text)
+      }
     }
 
     function newCopy(i) {
@@ -185,7 +210,7 @@
         }
       }
     }
-    
+
     document.getElementById("range").addEventListener("change", (e) => {
       document.querySelectorAll(".textarea").forEach(element => {
         element.style.fontSize = e.target.value + "px"
