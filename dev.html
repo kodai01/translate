@@ -1,3 +1,4 @@
+<!-- TODO: a. as.s aw.aq この文字列だとバグあり -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -133,20 +134,32 @@
       document.getElementById(`title${i}`).innerText = document.getElementById(`input${i}`).value
     }
 
-    function unexpectedError(text) {
+    function unexpectedError(text, i) {
       if (text.length == 0) {
         alert("0文字です")
         return false
       }
       if (/\.\S/.test(text)) {
-        
-        const matchList = text.match(/\.\S+/g)
-        const confirmList = []
-        for (let i = 0; i < matchList.length; i++) {
-            confirmList.push(window.confirm(`.の直後が空白ではありませんがこのままコピーしますか。${matchList[i]}`))
+      const matchList = text.match(/\.\S+/g)
+        for (let j = 0; j < matchList.length; j++) {
+          let element = document.getElementById(`japanese${i}`).innerHTML
+          console.log(matchList[j])
+          const reg = new RegExp("(" + matchList[j] + ")");
+          
+          element = element.replace(reg, `<span style="background-color: red"> $1 </span>`)
+          
+          document.getElementById(`japanese${i}`).innerHTML = element
         }
+        const confirm = window.confirm(".の直後が空白ではありませんがこのままコピーしますか。")
+
+        return confirm
+
+        // const confirmList = []
+        // for (let i = 0; i < matchList.length; i++) {
+        //     confirmList.push(window.confirm(`.の直後が空白ではありませんがこのままコピーしますか。${matchList[i]}`))
+        // }
         
-        return confirmList.every(confirm => confirm === true)
+        // return confirmList.every(confirm => confirm === true)
       }
       return true
     }
@@ -156,7 +169,7 @@
         tmpCopy += "\n"
       }
       const text = document.getElementById(`japanese${i}`).innerText
-      const notUnexpectedError = unexpectedError(text)
+      const notUnexpectedError = unexpectedError(text, i)
 
       if (notUnexpectedError) {
         tmpCopy += text
@@ -172,12 +185,19 @@
     function copy(i) {
       const text = document.getElementById(`japanese${i}`).innerText
       if (/\.\S/.test(text)) {
-        const matchList = text.match(/\.\S+/g)
-        const confirmList = []
-        for (let i = 0; i < matchList.length; i++) {
-            confirmList.push(window.confirm(`.の直後が空白ではありませんがこのままコピーしますか。${matchList[i]}`))
-        }
-        if (confirmList.every(confirm => confirm === true)) {
+        const notUnexpectedError = unexpectedError(text, i)
+
+        // const matchList = text.match(/\.\S+/g)
+        // for (let j = 0; j < matchList.length; j++) {
+        //   let element = document.getElementById(`japanese${i}`).innerHTML
+        //   const reg = new RegExp("(" + matchList[j] + ")");
+          
+        //   element = element.replace(reg, `<span style="background-color: red"> $1 </span>`)
+          
+        //   document.getElementById(`japanese${i}`).innerHTML = element
+        // }
+        // const confirm = window.confirm(".の直後が空白ではありませんがこのままコピーしますか。")
+        if (notUnexpectedError) {
           setTimeout(async() => await navigator.clipboard.writeText(text), 1000)
         }
       } else {
