@@ -139,8 +139,14 @@
         return false
       }
       if (/\.\S/.test(text)) {
-        const confirm = window.confirm(`.の直後が空白ではありませんがこのままコピーしますか。${text.match(/\.\S+/)}`)
-        return confirm
+        
+        const matchList = text.match(/\.\S+/g)
+        const confirmList = []
+        for (let i = 0; i < matchList.length; i++) {
+            confirmList.push(window.confirm(`.の直後が空白ではありませんがこのままコピーしますか。${matchList[i]}`))
+        }
+        
+        return confirmList.every(confirm => confirm === true)
       }
       return true
     }
