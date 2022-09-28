@@ -8,15 +8,16 @@
       box-sizing: border-box;
     }
   </style>
-  <title>Document</title>
+  <title>α版</title>
 </head>
 <body>
+  <div id="mode" style="position: fixed; top: 0; left: 0; background-color: rgba(239, 133, 129, 0.5); padding: 16px; z-index: 1;">通常コピー中</div>
   <div id="main" style="margin-bottom: 72px;"></div>
   <div style="position: fixed; bottom: 0px; width: 100%; height: 72px; background-color: antiquewhite; display: flex;">
     <div>
       <select name="selct" id="textOrRe" style="width: 60px;">
-        <option value="text">text</option>
-        <option value="re">regular expression</option>
+        <option value="text">文字</option>
+        <option value="re">正規表現</option>
       </select>
       <select name="pattern" id="pattern" style="width: 100px;">
         <option value="no">-</option>
@@ -40,7 +41,7 @@
     <div style="display: flex; align-items: center; flex-direction: column;">
       <input type="range" id="range" min="1" max="30" value="16" />
       <div style="display: flex; padding: 0 8px;">
-        <button style="width: 88px; height: 48px;" onclick="seqReset()">連続コピーリセット</button>
+        <button id="modeChange" style="width: 88px; height: 48px;" onclick="changeMode()">連続コピー</button>
         <button style="width: 88px; height: 48px;" onclick="reset()">全リセット</button>
       </div>
     </div>
@@ -51,6 +52,7 @@
     const re = new RegExp(/\r?\n/g);
     let viewTextarea = 30;
     let tmpCopy = ""
+    let isModeSeqCopy = false
     for (let i = 1; i <= viewTextarea; i++) {
       const html = `
       <div style="display: flex; flex-direction: column; margin-bottom: 16px;">
@@ -62,14 +64,13 @@
           <div style="position: relative; width: 50%;" class="left">
             <textarea class="textarea" id="word${i}" style="width: 100%; height: 480px; font-size: 16px; padding: 8px;"></textarea>
             <div style="position: absolute; bottom: 8px; right: 0; display: flex; align-items: center;">
-              <button id="button${i}" style="width: 160px; height: 42px; line-height: 16px;">決定</button>
+              <button class="button" id="button${i}" style="width: 160px; height: 42px; line-height: 16px;">決定</button>
             </div>
           </div>
           <div style="width: 50%; position: relative;" class="right">
             <div id="japanese${i}"></div>
             <div style="display: flex; align-items: flex-end">
-              <button style="position: absolute; bottom: 0; right: 160px; width: 160px; height: 42px; line-height: 16px;" onclick="seqCopy(${i});">連続コピー</button>  
-              <button style="position: absolute; bottom: 0; right: 0; width: 160px; height: 42px; line-height: 16px;" onclick="copy(${i});">コピー</button>  
+              <button style="position: absolute; bottom: 0; right: 0; width: 160px; height: 42px; line-height: 16px;" onclick="newCopy(${i});">コピー</button>  
             </div>
           </div>
         </div>
@@ -132,39 +133,94 @@
       document.getElementById(`title${i}`).innerText = document.getElementById(`input${i}`).value
     }
 
+    function unexpectedError(text) {
+      if (text.length == 0) {
+        alert("0文字です")
+        return false
+      }
+      if (/\.\S/.test(text)) {
+        
+        const matchList = text.match(/\.\S+/g)
+        const confirmList = []
+        for (let i = 0; i < matchList.length; i++) {
+            confirmList.push(window.confirm(`.の直後が空白ではありませんがこのままコピーしますか。${matchList[i]}`))
+        }
+        
+        return confirmList.every(confirm => confirm === true)
+      }
+      return true
+    }
+
     function seqCopy(i) {
       if (document.checkbox.seqCopyMode.checked && tmpCopy.length != 0) {
         tmpCopy += "\n"
       }
-      tmpCopy += document.getElementById(`japanese${i}`).innerText
-      if (tmpCopy.length > 5000) {
-        alert("5000文字を超えています")
-      } else {
-        navigator.clipboard.writeText(tmpCopy)
-        document.getElementById("copylength").innerText = tmpCopy.length
+      const text = document.getElementById(`japanese${i}`).innerText
+      const notUnexpectedError = unexpectedError(text)
+
+      if (notUnexpectedError) {
+        tmpCopy += text
+        if (tmpCopy.length > 5000) {
+          alert("5000文字を超えています")
+        } else {
+          setTimeout(async() => await navigator.clipboard.writeText(tmpCopy), 1000)
+          document.getElementById("copylength").innerText = tmpCopy.length
+        }
       }
     }
 
     function copy(i) {
-      navigator.clipboard.writeText(document.getElementById(`japanese${i}`).innerText)
-      seqReset()
+      const text = document.getElementById(`japanese${i}`).innerText
+      if (/\.\S/.test(text)) {
+        const matchList = text.match(/\.\S+/g)
+        const confirmList = []
+        for (let i = 0; i < matchList.length; i++) {
+            confirmList.push(window.confirm(`.の直後が空白ではありませんがこのままコピーしますか。${matchList[i]}`))
+        }
+        if (confirmList.every(confirm => confirm === true)) {
+          setTimeout(async() => await navigator.clipboard.writeText(text), 1000)
+        }
+      } else {
+          navigator.clipboard.writeText(text)
+      }
     }
 
-    function seqReset() {
+    function newCopy(i) {
+      if (isModeSeqCopy) {
+        seqCopy(i)
+      } else {
+        copy(i)
+      }
+    }
+
+    function changeMode() {
       tmpCopy = ""
       document.getElementById("copylength").innerText = 0
+      if (isModeSeqCopy) {
+        isModeSeqCopy = false
+        document.getElementById("modeChange").innerText = "連続コピー"
+        document.getElementById("mode").innerText = "通常コピー中"
+      } else {
+        isModeSeqCopy = true
+        document.getElementById("modeChange").innerText = "通常コピー"
+        document.getElementById("mode").innerText = "連続コピー中"
+      }
     }
 
     function reset() {
-      seqReset()
-      for (let i = 1; i <= viewTextarea; i++) {
-        document.getElementById(`input${i}`).value = ""
-        document.getElementById(`word${i}`).value = ""
-        document.getElementById(`title${i}`).value = ""
-        document.getElementById(`japanese${i}`).innerText = ""        
+      const confirm = window.confirm("連続コピー中だが削除して問題ないか？")
+      if (confirm) {
+        tmpCopy = ""
+        document.getElementById("copylength").innerText = 0
+        for (let i = 1; i <= viewTextarea; i++) {
+          document.getElementById(`input${i}`).value = ""
+          document.getElementById(`word${i}`).value = ""
+          document.getElementById(`title${i}`).innerText = ""
+          document.getElementById(`japanese${i}`).innerText = ""        
+        }
       }
     }
-    
+
     document.getElementById("range").addEventListener("change", (e) => {
       document.querySelectorAll(".textarea").forEach(element => {
         element.style.fontSize = e.target.value + "px"
