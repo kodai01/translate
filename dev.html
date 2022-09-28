@@ -166,8 +166,12 @@
     function copy(i) {
       const text = document.getElementById(`japanese${i}`).innerText
       if (/\.\S/.test(text)) {
-        const confirm = window.confirm(`.の直後が空白ではありませんがこのままコピーしますか。${text.match(/\.\S+/)}`)
-        if (confirm) {
+        const matchList = text.match(/\.\S+/g)
+        const confirmList = []
+        for (let i = 0; i < matchList.length; i++) {
+            confirmList.push(window.confirm(`.の直後が空白ではありませんがこのままコピーしますか。${matchList[i]}`))
+        }
+        if (confirmList.every(confirm => confirm === true)) {
           setTimeout(async() => await navigator.clipboard.writeText(text), 1000)
         }
       } else {
