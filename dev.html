@@ -144,8 +144,7 @@
         for (let j = 0; j < matchList.length; j++) {
           let element = document.getElementById(`japanese${i}`).innerHTML
           console.log(matchList[j])
-          const reg = new RegExp("(" + matchList[j] + ")");
-          
+          const reg = new RegExp("(\\" + matchList[j] + ")");
           element = element.replace(reg, `<span style="background-color: red"> $1 </span>`)
           
           document.getElementById(`japanese${i}`).innerHTML = element
