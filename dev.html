@@ -140,7 +140,7 @@
         return false
       }
       if (/\.\S/.test(text)) {
-      const matchList = text.match(/\.\S+/g)
+      const matchList = text.match(/\.\S/g)
         for (let j = 0; j < matchList.length; j++) {
           let element = document.getElementById(`japanese${i}`).innerHTML
           console.log(matchList[j])
