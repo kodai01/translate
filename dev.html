@@ -147,7 +147,7 @@
           const reg = new RegExp("(\\" + matchList[j] + ")");
           console.log(reg)
           
-          element = element.replace(reg, `<span style="background-color: red">$1</span>`)
+          element = element.replaceAll(reg, `<span style="background-color: red">$1</span>`)
           
           document.getElementById(`japanese${i}`).innerHTML = element
         }
